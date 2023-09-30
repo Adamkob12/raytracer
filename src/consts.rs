@@ -27,10 +27,21 @@ pub const BACKGROUND_COLOR: Color = Color {
     b: 255,
 };
 
+#[derive(Clone, Copy, Debug)]
 pub struct Color {
     r: u8,
     g: u8,
     b: u8,
+}
+
+impl Color {
+    pub fn apply_light_intensity(self, intensity: f32) -> Color {
+        Color {
+            r: ((self.r as f32) * intensity).min(255.0) as u8,
+            g: ((self.g as f32) * intensity).min(255.0) as u8,
+            b: ((self.b as f32) * intensity).min(255.0) as u8,
+        }
+    }
 }
 
 pub fn canvas_to_viewport(x: i32, y: i32) -> Vec3 {
@@ -41,7 +52,7 @@ pub fn canvas_to_viewport(x: i32, y: i32) -> Vec3 {
     )
 }
 
-impl Into<[u8; 3]> for &Color {
+impl Into<[u8; 3]> for Color {
     fn into(self) -> [u8; 3] {
         [self.r, self.g, self.b]
     }
@@ -58,7 +69,7 @@ impl From<[u8; 3]> for Color {
 }
 
 pub fn quadratic(a: f32, b: f32, c: f32) -> Option<(f32, f32)> {
-    let disc = b.powi(2) - 4.0 * a * c;
+    let disc = b * b - 4.0 * a * c;
     if disc < 0.0 {
         return None;
     }
@@ -67,6 +78,6 @@ pub fn quadratic(a: f32, b: f32, c: f32) -> Option<(f32, f32)> {
         return Some((tmp, tmp));
     } else {
         let disc = disc.powf(0.5);
-        return Some(((-b + disc) / 2.0 * a, (-b - disc) / 2.0 * a));
+        return Some(((-b + disc) / (2.0 * a), (-b - disc) / (2.0 * a)));
     }
 }

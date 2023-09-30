@@ -1,6 +1,6 @@
-use crate::{quadratic, scene::*, Color, Vec3, BACKGROUND_COLOR, INF};
+use crate::*;
 
-pub fn trace_ray(source: Vec3, dest: Vec3, t_min: i32, t_max: i32, scene: &Scene) -> &Color {
+pub fn trace_ray(source: Vec3, dest: Vec3, t_min: i32, t_max: i32, scene: &Scene) -> Color {
     let mut closest = INF as f32;
     let mut closest_prim = None;
     for prim in scene.iter_primitives() {
@@ -15,15 +15,29 @@ pub fn trace_ray(source: Vec3, dest: Vec3, t_min: i32, t_max: i32, scene: &Scene
             }
         }
     }
+    // Calculate light
     if let Some(p) = closest_prim {
-        return p.color().unwrap();
+        let intersection_point = source + closest * dest;
+        let normal = p.compute_normal(intersection_point);
+        let mut intensity = 0.0;
+        for light in scene.iter_lights() {
+            intensity += compute_light(
+                -closest * dest,
+                p.get_shininess(),
+                intersection_point,
+                normal,
+                light,
+            );
+        }
+        let color = p.color().unwrap().apply_light_intensity(intensity);
+        return color;
     }
-    &BACKGROUND_COLOR
+    BACKGROUND_COLOR
 }
 
 pub fn intersect_ray(source: Vec3, dest: Vec3, primitive: &Primitive) -> Option<(f32, f32)> {
     match primitive {
-        Primitive::Sphere(center, radius, _) => {
+        Primitive::Sphere(center, radius, _, _) => {
             let co = source - *center;
             let a = dest.dot(dest);
             let b = 2.0 * co.dot(dest);
