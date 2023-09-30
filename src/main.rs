@@ -27,8 +27,9 @@ fn main() {
             1,
             INF,
             &scene,
+            0,
         );
-        *pixel = Rgb(Color::into(color));
+        *pixel = Rgb(Color::into(color.unwrap_or(BACKGROUND_COLOR)));
     }
     buffer.save("output/render.png").unwrap();
 }
@@ -40,27 +41,31 @@ fn setup_scene() -> Scene {
         1.0,
         Color::from([255, 0, 0]),
         500.0,
+        0.7,
     ));
     scene.insert_primitive(Primitive::Sphere(
         [-2.0, 0.0, 4.0].into(),
         1.0,
         Color::from([0, 255, 0]),
         10.0,
+        0.2,
     ));
     scene.insert_primitive(Primitive::Sphere(
         [2.0, 0.0, 4.0].into(),
         1.0,
         Color::from([0, 0, 255]),
         500.0,
+        0.3,
     ));
     scene.insert_primitive(Primitive::Sphere(
         [0.0, -5001.0, 0.0].into(),
         5000.0,
         Color::from([255, 255, 0]),
         1000.0,
+        0.5,
     ));
-    scene.insert_light_source(LightSource::Point(0.6, [2.0, 1.0, 0.0].into()));
-    scene.insert_light_source(LightSource::Ambient(0.2));
-    scene.insert_light_source(LightSource::Directional(0.2, [1.0, 4.0, 4.0].into()));
+    scene.insert_light_source(LightSource::Point(0.5, [2.0, 1.0, 0.0].into()));
+    // scene.insert_light_source(LightSource::Ambient(0.2));
+    scene.insert_light_source(LightSource::Directional(0.5, [1.0, 4.0, 4.0].into()));
     scene
 }

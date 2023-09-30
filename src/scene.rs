@@ -15,6 +15,15 @@ impl Scene {
     }
 
     pub fn insert_primitive(&mut self, primitive: Primitive) {
+        match primitive {
+            Primitive::Sphere(_center, _radius, _color, _s, refl) => {
+                if refl < 0.0 || refl > 1.0 {
+                    panic!("Reflectiveness value should be between 0.0 and 1.0 inclusive");
+                }
+            }
+            #[allow(unreachable_patterns)]
+            _ => todo!("implement unimplemented primitive case for `get_shininess`"),
+        }
         self.primitives.push(primitive);
     }
 

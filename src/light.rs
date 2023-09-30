@@ -1,3 +1,5 @@
+use crate::ray::intersect_ray;
+use crate::Primitive;
 use crate::Vec3;
 
 // Point: intensity, position
@@ -61,4 +63,35 @@ fn calc_intensity(direction_vector: Vec3, normal: Vec3, intensity: f32) -> f32 {
     return ((dot / direction_vector.length()) * intensity).max(0.0);
     // if the light comes from behind the point, the intensity will end up being negative (we dont
     // want that, so we use .max(0.0))
+}
+
+// Function checks given a point, a light source and a collection (Iterator) of possible obstacles,
+// wether the point is seen by the light source, aka is the point in shade.
+pub fn is_visible_by_light<'a>(
+    point: Vec3,
+    light: &LightSource,
+    obstacles: impl Iterator<Item = &'a Primitive>,
+) -> bool {
+    let direction: Vec3;
+    let min = 0.001;
+    let max;
+    match light {
+        LightSource::Ambient(_) => return true,
+        LightSource::Point(_, light_pos) => {
+            direction = *light_pos - point;
+            max = 1.0;
+        }
+        LightSource::Directional(_, dir) => {
+            max = f32::MAX;
+            direction = *dir;
+        }
+    }
+    for obst in obstacles {
+        if let Some((t, s)) = intersect_ray(point, direction, obst) {
+            if min < t && t < max || min < s && s < max {
+                return false;
+            }
+        }
+    }
+    true
 }
